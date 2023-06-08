@@ -1,9 +1,14 @@
 ﻿using LinqToTwitter;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace TwitterETL.Models
 {
+    [PrimaryKey("tweetID")]
     public class TweetDTO
     {
+        [Key]
+        public string tweetID { get ; set; }
         public string? userID { get; set; }
         public string? location { get; set; }
         public DateTime? dateTime { get; set; }
