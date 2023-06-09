@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TwitterETL;
 using TwitterETL.Context;
 using TwitterETL.Repositories;
 using TwitterETL.Services;
@@ -18,6 +19,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ITweetGeneration, TweetGeneration>();
 builder.Services.AddSingleton<ITweetRepository, TweetRepository>();
 builder.Services.AddSingleton<ITweetService, TweetService>();
+builder.Services.AddSingleton<IRealTimeTweetGeneration, RealTimeTweetGeneration>();
 
 var app = builder.Build();
 
@@ -33,5 +35,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Services.GetService<IRealTimeTweetGeneration>();
 
 app.Run();

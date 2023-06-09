@@ -1,5 +1,6 @@
 ﻿using LinqToTwitter;
 using System;
+using System.Security.Cryptography;
 using TwitterETL.Models;
 using TwitterETL.Repositories;
 
@@ -14,6 +15,7 @@ namespace TwitterETL.Services
     {
         private static Random random = new Random();
         public List<TweetEntityHashtag> AvailableHashtags = new List<TweetEntityHashtag>();
+        HashAlgorithm sha = SHA256.Create();
 
         public TweetGeneration()
         {
@@ -25,7 +27,7 @@ namespace TwitterETL.Services
             var x = new TweetDTO
             {
                 tweetID = tweet.ID,
-                userID = tweet.AuthorID,
+                userID = HashString(tweet.AuthorID),
                 location = tweet.Geo.PlaceID,
                 dateTime = tweet.CreatedAt,
                 hashtags = tweet.Entities.Hashtags.Select(x => x.Tag).ToList(),
@@ -84,7 +86,7 @@ namespace TwitterETL.Services
             List<TweetEntityHashtag> list = new List<TweetEntityHashtag>();
             for (var i = 0; i < length; i++)
             {
-                int index = random.Next(length - i);
+                int index = random.Next(0, hashtagMaster.Count);
                 list.Add(hashtagMaster[index]);
                 hashtagMaster.RemoveAt(index);
             }
@@ -112,6 +114,29 @@ namespace TwitterETL.Services
                 });
             }
             return list;
+        }
+
+        private string HashString(string text, string salt = "")
+        {
+            if (String.IsNullOrEmpty(text))
+            {
+                return String.Empty;
+            }
+
+            // Uses SHA256 to create the hash
+            using (var sha = SHA256.Create())
+            {
+                // Convert the string to a byte array first, to be processed
+                byte[] textBytes = System.Text.Encoding.UTF8.GetBytes(text + salt);
+                byte[] hashBytes = sha.ComputeHash(textBytes);
+
+                // Convert back to a string, removing the '-' that BitConverter adds
+                string hash = BitConverter
+                    .ToString(hashBytes)
+                    .Replace("-", String.Empty);
+
+                return hash;
+            }
         }
     }
 }
